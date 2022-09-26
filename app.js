@@ -1,132 +1,44 @@
-const  addBox = document.querySelector(".add-box"),
-popupTitle = document.querySelector("header p"),
-popupBox = document.querySelector(".popup-box"),
-closeModal = document.querySelector(".uil-times"),
-addBtn = document.querySelector("form button")
-noteTit = document.querySelector(".title input"),
-noteDesc = document.querySelector(".description textarea")
-;
+const wrapper = document.querySelector('.wrapper'),
+ selectBtn = wrapper.querySelector('.select-btn'),
+ searchInp = wrapper.querySelector('input'),
+ countryOptions = document.querySelector('.options')
+ ;
 
-const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-
-const notes = JSON.parse(localStorage.getItem('notes') || '[]');
+const countries = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua &amp; Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia &amp; Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Cape Verde","Cayman Islands","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cruise Ship","Cuba","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kuwait","Kyrgyz Republic","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritania","Mauritius","Mexico","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Namibia","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","Norway","Oman","Pakistan","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre &amp; Miquelon","Samoa","San Marino","Satellite","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","South Africa","South Korea","Spain","Sri Lanka","St Kitts &amp; Nevis","St Lucia","St Vincent","St. Lucia","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad &amp; Tobago","Tunisia","Turkey","Turkmenistan","Turks &amp; Caicos","Uganda","Ukraine","United Arab Emirates","United Kingdom","Uruguay","Uzbekistan","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
 
 
-let isUpdate = false, updateId;
-
-addBox.addEventListener('click', ()=>
-{popupBox.classList.add('show')
-noteTit.focus();
-});
-
-closeModal.addEventListener('click', ()=>{
-    isUpdate = false;
-    noteTit.value = ''; 
-    noteDesc.value = ''; 
-    addBtn.innerText = 'Add Note';
-    popupTitle.innerText = 'Add a New Note';
-    popupBox.classList.remove('show');
-});
-
-// popupBox.addEventListener('click', ()=>{
-//     popupBox.classList.remove('show');
-//     noteTit.value = ''; 
-//     noteDesc.value = ''; 
-// });
-
-function showNotes(){
-    document.querySelectorAll('.note').forEach((note)=>note.remove());
-    notes.forEach((note, index) => {
-
-        let filterDesc = note.description.replaceAll("\n", '<br/>');
-        let liTag = `<li class="note">
-                        <div class="details">
-                            <p>${note.title}</p>
-                            <span>${filterDesc}</span>
-                        </div>
-                        <div class="bottom-content">
-                            <span>${note.date}</span>
-                            <div class="settings">
-                                <i onclick="showMenu(this)" class="uil uil-ellipsis-h">...</i>
-                                <ul class="menu">
-                                    <li onclick="updateNote(${index}, '${note.title}', '${filterDesc}')"><i class="uil uil-pen"></i>Edit</li>
-                                    <li onclick="deleteNote(${index})"><i class="uil uil-trash"></i>Delete</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </li>`;
-
-                    addBox.insertAdjacentHTML('afterend', liTag);
+function addCountry(){
+    countryOptions.innerHTML = '';
+    countries.forEach(country => {
+        // console.log(country);
+        let newList = `<li onclick="updateName(this)">${country}</li>`;
+        countryOptions.insertAdjacentHTML('beforeend', newList);
     });
 }
-showNotes();
+addCountry();
 
-
-function showMenu(elem){
-    elem.parentElement.classList.add('show');
-    document.addEventListener('click', (e)=>{
-        if(e.target.tagName != 'I' || e.target != elem){
-            elem.parentElement.classList.remove('show');
-        }
-    });
+function updateName(selectedLi){
+    searchInp.value = '';
+    addCountry();
+    wrapper.classList.remove('active');
+    selectBtn.firstElementChild.innerHTML = selectedLi.innerText;
 }
 
-
-
-
-addBtn.addEventListener('click', (e)=>{
-    e.preventDefault(); 
-    noteTitle = noteTit.value;
-    noteDescription = noteDesc.value;
-
-    if(noteTitle || noteDescription){
-        let dateObj = new Date(),
-        dateYear = dateObj.getFullYear(), 
-        dateDay = dateObj.getDate(), 
-        dateMonth = months[dateObj.getMonth()];
-
-        let noteInfo =  {
-            title: noteTitle,
-            description: noteDescription,
-            date:  `${dateMonth} ${dateDay},${dateYear}`
-        };
-
-        if(!isUpdate){
-            notes.push(noteInfo);
-        }else{
-            isUpdate = false;
-            notes[updateId] = noteInfo;
-        }
-
-        localStorage.setItem('notes',  JSON.stringify(notes));
-    }
-    popupBox.classList.remove('show');
-    showNotes();
-});
-
-
-function updateNote(noteId, title, desc){
-
-    isUpdate = true;
-    updateId = noteId;
-    noteTit.value = title;
-    noteDesc.value = desc;
-    addBox.click();
-    addBtn.innerText = 'Upate Note';
-    popupTitle.innerText = 'Edit Note';
+searchInp.addEventListener('keyup', (e)=>{
+    e.preventDefault();
+    let arr= [];
+    let searchVal = searchInp.value.toLowerCase();
+    arr = countries.filter(data =>{
+        return data.toLowerCase().startsWith(searchVal); 
+    }).map(data => `<li onclick="updateName(this)>${data}</li>`).join('');
     
+    countryOptions.innerHTML = arr ? arr : `<p>Oops! Country not found</p>`;
+});
 
-}
 
+ selectBtn.addEventListener('click', ()=>{
+    wrapper.classList.toggle('active');
 
-function deleteNote(noteId){
-    let confirmDel = confirm('Are you sure you want to delete this note?');
+ 
+ });
 
-    if(confirmDel){
-        notes.splice(noteId, 1);
-        localStorage.setItem('notes',  JSON.stringify(notes));
-        showNotes();
-        // console.log(noteId);
-    }
-
-}
